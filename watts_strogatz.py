@@ -1,7 +1,9 @@
 __author__ = 'humberto'
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import random
+import numpy as np
 
 def genGraph_WS(n, prob):
     G=nx.Graph()
@@ -31,12 +33,44 @@ def genGraph_WS(n, prob):
     return G
 
 # GG = genGraph_WS(20, 0)
-# print(len(GG.edges()))
+# print(len(GG.edges
 
-# GG = genGraph_WS(20, .5)
-# print(len(GG.edges()))
+avg_clustering = []
+avg_sp = []
+# probs to be used to generate WS graphs
+probs = [0.0001, 0.00035, 0.00070, 0.001, 0.0035, 0.0070, 0.01, 0.035, 0.07, 0.1, 0.3, 0.6, 1]
+p0c = nx.average_clustering(nx.watts_strogatz_graph(nodes, 4, 0))
+p0sp = nx.average_shortest_path_length(nx.watts_strogatz_graph(nodes, 4, 0))
 
+# Generating the graphs and obtaining the average clustering coeff and shortest paths.
+for p in probs:
+    #G = genGraph_WS(nodes, p)
+    G=nx.watts_strogatz_graph(nodes, 4, p)
+    avg_sp.append(nx.average_shortest_path_length(G) / p0sp)
+    avg_clustering.append(nx.average_clustering(G) / p0c)
+
+print(avg_clustering)
+print(avg_sp)
+
+# Trick to plot the axis in logscale
+probs_axis = []
+for p in probs:
+    probs_axis = probs_axis + [p*1000]
 
 # nx.draw(GG, pos=nx.circular_layout(GG))
-# plt.show()
+
+fig = plt.figure(figsize=(12,8))
+
+ax = fig.add_subplot(111)
+fig.subplots_adjust(top=0.85)
+ax.set_xlabel('prob * 1000')
+
+
+plt.scatter(probs_axis, avg_clustering, c="b", label="Avg Clust Coeff")
+plt.scatter(probs_axis, avg_sp, marker='s', c="r", label="Avg. shortest path")
+plt.legend()
+plt.gca().set_xscale('log')
+plt.grid(True)
+plt.show()
+
 
